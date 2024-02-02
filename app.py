@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import sqlite3
 app = Flask(__name__)
 
@@ -48,8 +48,24 @@ def muestra():
         datos=cursor.fetchall()
         return render_template('muestra.html',data=datos)
 
-@app.route('/insertar',methods=['POST'])
 
+@app.route('/api')
+def genJson():
+    with sqlite3.connect(BD) as conn:
+        cursor = conn.cursor()
+        query = "SELECT * FROM contenido"
+        cursor.execute(query)
+        datos = cursor.fetchall()
+        json = []
+        for dato in datos:
+            json.append({
+                'titulo':dato[1],
+                'entrada':dato[2],
+                'urlimagen':dato[4]
+                })
+        return jsonify(json) 
+
+@app.route('/insertar',methods=['POST'])
 def insertar():
     if request.method=='POST':
         nombre=request.form['titulo']
@@ -68,5 +84,3 @@ def insertar():
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
-    
